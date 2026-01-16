@@ -2,14 +2,27 @@
 #   Wojc's office fixer
 # ==========================================
 
-# 1. SELF-ELEVATE (Run as Admin automatically)
+
+
+$WebUrl = "https://raw.githubusercontent.com/wojcfurry-dev/office-fixer/main/Office%20repair.ps1"
+
+# 2. LOGIC: Check if we are Admin. If not, restart.
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Host "Requesting Admin rights..." -ForegroundColor Yellow
-    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    
+    # Check: Is this a real file on the disk?
+    if ($PSCommandPath) {
+        # LOCAL MODE: Restart the file on disk
+        Write-Host "Restarting Local File as Admin..." -ForegroundColor Yellow
+        Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    } 
+    else {
+        # WEB MODE: Restart using the URL
+        Write-Host "Restarting Web Script as Admin..." -ForegroundColor Yellow
+        Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -Command `"irm '$WebUrl' | iex`"" -Verb RunAs
+    }
+    
     Exit
 }
-
-$ErrorActionPreference = "SilentlyContinue"
 
 # 2. KILL OFFICE APPS
 Write-Host "Closing Office Applications..." -ForegroundColor Cyan
@@ -32,10 +45,11 @@ New-ItemProperty -Path $Policy -Name "BlockAADWorkplaceJoin" -Value 1 -PropertyT
 
 
 
-# 6. RESTART SERVICES & LAUNCH OFFICE
+# 5. RESTART SERVICES & LAUNCH OFFICE
 Write-Host "Restarting Auth Services..." -ForegroundColor Green
 Stop-Service -Name "TokenBroker" -Force
 Start-Service -Name "TokenBroker"
 
 Write-Host "Launching Word..." -ForegroundColor Green
+
 Start-Process "winword.exe"
