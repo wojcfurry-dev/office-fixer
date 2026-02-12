@@ -38,7 +38,7 @@ $Policy = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin"
 if (!(Test-Path $Policy)) { New-Item -Path $Policy -Force | Out-Null }
 New-ItemProperty -Path $Policy -Name "BlockAADWorkplaceJoin" -Value 1 -PropertyType DWORD -Force | Out-Null
 Write-Host "Prevention policy set." -ForegroundColor Green
-
+<#
 # 5. WORD LAUNCH LOOP
 Write-Host "`nOpening Word (Phase 1)..." -ForegroundColor Cyan
 Start-Process "winword.exe"
@@ -55,3 +55,5 @@ Start-Process "winword.exe"
 
 
 Write-Host "`nDONE. Made with love in Hertfordshire :3"
+
+#>
